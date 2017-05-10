@@ -1,0 +1,14 @@
+{
+  "name": "electron-touchbar",
+  "version": "0.1.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "electron": "^1.6.6"
+  },
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "MIT"
+}
