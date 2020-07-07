@@ -1,118 +1,118 @@
 // Modified from https://github.com/electron/electron/blob/master/docs/api/touch-bar.md
 
-const {app, BrowserWindow, TouchBar} = require('electron')
+const { app, BrowserWindow, TouchBar } = require("electron");
 
-const {TouchBarLabel, TouchBarButton, TouchBarSpacer} = TouchBar
+const { TouchBarLabel, TouchBarButton, TouchBarSpacer } = TouchBar;
 
-const path = require('path')
-const url = require('url')
+const path = require("path");
+const url = require("url");
 
-let spinning = false
+let spinning = false;
 
 // Reel labels
-const reel1 = new TouchBarLabel()
-const reel2 = new TouchBarLabel()
-const reel3 = new TouchBarLabel()
+const reel1 = new TouchBarLabel();
+const reel2 = new TouchBarLabel();
+const reel3 = new TouchBarLabel();
 
 // Spin result label
-const result = new TouchBarLabel()
+const result = new TouchBarLabel();
 
 // Spin button
 const spin = new TouchBarButton({
-  label: '🎰  Spin',
-  backgroundColor: '#7851A9',
+  label: "🎰  Spin",
+  backgroundColor: "#7851A9",
   click: () => {
-    window.webContents.send('result', {_label: null});
-
     // Ignore clicks if already spinning
     if (spinning) {
-      return
+      return;
     }
 
-    spinning = true
-    result.label = ''
+    spinning = true;
+    result.label = "";
+    window.webContents.send("result", { label: result.label });
 
-    let timeout = 10
-    const spinLength = 4 * 1000 // 4 seconds
-    const startTime = Date.now()
+    let timeout = 10;
+    const spinLength = 4 * 1000; // 4 seconds
+    const startTime = Date.now();
 
     const spinReels = () => {
-      updateReels()
+      updateReels();
 
-      if ((Date.now() - startTime) >= spinLength) {
-        finishSpin()
+      if (Date.now() - startTime >= spinLength) {
+        finishSpin();
       } else {
         // Slow down a bit on each spin
-        timeout *= 1.1
-        setTimeout(spinReels, timeout)
+        timeout *= 1.1;
+        setTimeout(spinReels, timeout);
       }
-    }
+    };
 
-    spinReels()
-  }
-})
+    spinReels();
+  },
+});
 
 const getRandomValue = () => {
-  const values = ['🍒', '💎', '7️⃣', '🍊', '🔔', '⭐', '🍇', '🍀']
-  return values[Math.floor(Math.random() * values.length)]
-}
+  const values = ["🍒", "💎", "7️⃣", "🍊", "🔔", "⭐", "🍇", "🍀"];
+  return values[Math.floor(Math.random() * values.length)];
+};
 
 const updateReels = () => {
-  reel1.label = getRandomValue()
-  reel2.label = getRandomValue()
-  reel3.label = getRandomValue()
+  reel1.label = getRandomValue();
+  reel2.label = getRandomValue();
+  reel3.label = getRandomValue();
 
   // Send reel objects to window
-  window.webContents.send('reel', reel1);
-  window.webContents.send('reel', reel2);
-  window.webContents.send('reel', reel3);
-}
+  window.webContents.send("reel", { id: 1, label: reel1.label });
+  window.webContents.send("reel", { id: 2, label: reel2.label });
+  window.webContents.send("reel", { id: 3, label: reel3.label });
+};
 
 const finishSpin = () => {
-  const uniqueValues = new Set([reel1.label, reel2.label, reel3.label]).size
+  const uniqueValues = new Set([reel1.label, reel2.label, reel3.label]).size;
   if (uniqueValues === 1) {
     // All 3 values are the same
-    result.label = '💰  Jackpot!'
-    result.textColor = '#FDFF00'
+    result.label = "💰  Jackpot!";
+    result.textColor = "#FDFF00";
   } else if (uniqueValues === 2) {
     // 2 values are the same
-    result.label = '😍  Winner!'
-    result.textColor = '#FDFF00'
+    result.label = "😍  Winner!";
+    result.textColor = "#FDFF00";
   } else {
     // No values are the same
-    result.label = '🙁  Spin Again'
-    result.textColor = null
+    result.label = "🙁  Spin Again";
+    result.textColor = null;
   }
 
   // Send result to window
-  window.webContents.send('result', result);
+  window.webContents.send("result", { label: result.label });
 
-  spinning = false
-}
+  spinning = false;
+};
 
-const touchBar = new TouchBar([
-  spin,
-  new TouchBarSpacer({size: 'large'}),
-  reel1,
-  new TouchBarSpacer({size: 'small'}),
-  reel2,
-  new TouchBarSpacer({size: 'small'}),
-  reel3,
-  new TouchBarSpacer({size: 'large'}),
-  result
-])
+const touchBar = new TouchBar({
+  items: [
+    spin,
+    new TouchBarSpacer({ size: "large" }),
+    reel1,
+    new TouchBarSpacer({ size: "small" }),
+    reel2,
+    new TouchBarSpacer({ size: "small" }),
+    reel3,
+    new TouchBarSpacer({ size: "large" }),
+    result,
+  ],
+});
 
-let window
+let window;
 
-app.once('ready', () => {
+app.whenReady().then(() => {
   window = new BrowserWindow({
     width: 350,
-    height: 125
-  })
-  window.loadURL(url.format({
-    pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }))
-  window.setTouchBar(touchBar)
-})
+    height: 125,
+    webPreferences: {
+      nodeIntegration: true,
+    },
+  });
+  window.loadFile("index.html");
+  window.setTouchBar(touchBar);
+});

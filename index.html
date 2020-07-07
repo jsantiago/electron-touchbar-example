@@ -1,9 +1,13 @@
 <html>
-	<head>
+  <head>
     <meta charset="UTF-8" />
     <title>Touch Bar Test</title>
-		<link rel="stylesheet" href="style.css">
-	</head>
+    <link rel="stylesheet" href="style.css" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'self' 'unsafe-inline';"
+    />
+  </head>
   <body>
     <div>
       <span class="reel" id="reel1"></span>
@@ -12,7 +16,5 @@
     </div>
     <div id="result"></div>
   </body>
-  <script>
-    require('./window');
-  </script>
+  <script src="./window.js"></script>
 </html>
